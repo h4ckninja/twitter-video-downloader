@@ -78,7 +78,7 @@ def download(video_url):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-v', '--video', dest='video_url', help='The video URL on Twitter (https://twitter.com/<user>/video/<id>).', required=True)
+	parser.add_argument('-v', '--video', dest='video_url', help='The video URL on Twitter (https://twitter.com/<user>/status/<id>).', required=True)
 
 	args = parser.parse_args()
 
