@@ -10,6 +10,7 @@ import json
 import urllib.parse
 import m3u8
 from pathlib import Path
+import re
 
 
 def download(video_url):
@@ -27,18 +28,28 @@ def download(video_url):
 	video_player_url = video_player_url_prefix + tweet_id
 	video_player_response = requests.get(video_player_url)
 
+	# Get the JS file with the Bearer token to talk to the API.
+	# Twitter really changed things up.
+	js_file_soup = BeautifulSoup(video_player_response.text, 'html.parser')
+	js_file_url = js_file_soup.find('script')['src']
+	js_file_response = requests.get(js_file_url)
+
+	# Pull the bearer token out
+	bearer_token_pattern = re.compile('Bearer ([a-zA-Z0-9%-])+')
+	bearer_token = bearer_token_pattern.search(js_file_response.text)
+	bearer_token = bearer_token.group(0)
+
+	# Talk to the API to get the m3u8 URL
+	player_config = requests.get('https://api.twitter.com/1.1/videos/tweet/config/' + tweet_id + '.json', headers={'Authorization': bearer_token})
+	m3u8_url_get = json.loads(player_config.text)
+	m3u8_url_get = m3u8_url_get['track']['playbackUrl']
+
 	# Get m3u8
-	m3u8_url_response = BeautifulSoup(video_player_response.text, 'html.parser')
+	m3u8_response = requests.get(m3u8_url_get, headers = {'Authorization': bearer_token})
 
-	player_config = m3u8_url_response.find('div', class_ = 'player-container')
-	player_config = player_config['data-config']
-
-	m3u8_url = json.loads(player_config)['video_url']
-
-	m3u8_url_parse = urllib.parse.urlparse(m3u8_url)
+	m3u8_url_parse = urllib.parse.urlparse(m3u8_url_get)
 	video_host = m3u8_url_parse.scheme + '://' + m3u8_url_parse.hostname
 
-	m3u8_response = requests.get(m3u8_url)
 	m3u8_parse = m3u8.loads(m3u8_response.text)
 
 	if m3u8_parse.is_variant:
@@ -77,6 +88,12 @@ def download(video_url):
 
 
 if __name__ == '__main__':
+	import sys
+
+	if sys.version_info[0] == 2:
+		print('Python3 is required.')
+		sys.exit(1)
+
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-v', '--video', dest='video_url', help='The video URL on Twitter (https://twitter.com/<user>/status/<id>).', required=True)
 
