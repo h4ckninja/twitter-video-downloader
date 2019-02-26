@@ -83,7 +83,7 @@ def download(video_url):
 			# Shamelessly taken from https://stackoverflow.com/questions/13613336/python-concatenate-text-files/27077437#27077437
 			with open(str(ts_full_file), 'wb') as wfd:
 				for f in ts_list:
-					with open(f, 'rb') as fd:
+					with open(str(f), 'rb') as fd:
 						shutil.copyfileobj(fd, wfd, 1024 * 1024 * 10)
 
 
