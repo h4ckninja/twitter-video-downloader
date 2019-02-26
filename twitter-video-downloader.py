@@ -19,6 +19,7 @@ def download(video_url):
 	output_dir = './output'
 
 	# Parse the tweet ID
+	video_url = video_url.split('?', 1)[0]
 	tweet_user = video_url.split('/')[3]
 	tweet_id = video_url.split('/')[5]
 	tweet_dir = Path(output_dir + '/' + tweet_user + '/' + tweet_id)
