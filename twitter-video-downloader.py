@@ -80,21 +80,14 @@ def download(video_url):
 				ts_path.write_bytes(ts_file.content)
 
 
-			ts_full_file = Path(resolution_dir) / Path(resolution + '.ts')
-
-			# Shamelessly taken from https://stackoverflow.com/questions/13613336/python-concatenate-text-files/27077437#27077437
-			with open(str(ts_full_file), 'wb') as wfd:
-				for f in ts_list:
-					with open(str(f), 'rb') as fd:
-						shutil.copyfileobj(fd, wfd, 1024 * 1024 * 10)
-
 			mp4_full_file = Path(str(resolution_dir) + '.mp4')
 
 			# Convert TS to MP4
+			ts_streams = [ ffmpeg.input(str(_)) for _ in ts_list ]
 			(
 			    ffmpeg
-				.input(str(ts_full_file))
-				.output(str(mp4_full_file), strict=-2)
+				.concat(*ts_streams)
+				.output(str(mp4_full_file), strict=-2, loglevel='error')
 				.overwrite_output()
 				.run()
 			)
