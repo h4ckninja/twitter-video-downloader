@@ -12,6 +12,8 @@ import m3u8
 from pathlib import Path
 import re
 
+import ffmpeg
+
 
 def download(video_url):
 	video_player_url_prefix = 'https://twitter.com/i/videos/tweet/'
@@ -85,6 +87,20 @@ def download(video_url):
 				for f in ts_list:
 					with open(str(f), 'rb') as fd:
 						shutil.copyfileobj(fd, wfd, 1024 * 1024 * 10)
+
+			mp4_full_file = Path(str(resolution_dir) + '.mp4')
+
+			# Convert TS to MP4
+			(
+			    ffmpeg
+				.input(str(ts_full_file))
+				.output(str(mp4_full_file), strict=-2)
+				.overwrite_output()
+				.run()
+			)
+
+			# tidy up
+			shutil.rmtree(str(resolution_dir))
 
 
 if __name__ == '__main__':
