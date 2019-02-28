@@ -19,6 +19,7 @@ def download(video_url):
 	output_dir = './output'
 
 	# Parse the tweet ID
+	video_url = video_url.split('?', 1)[0]
 	tweet_user = video_url.split('/')[3]
 	tweet_id = video_url.split('/')[5]
 	tweet_dir = Path(output_dir + '/' + tweet_user + '/' + tweet_id)
@@ -83,7 +84,7 @@ def download(video_url):
 			# Shamelessly taken from https://stackoverflow.com/questions/13613336/python-concatenate-text-files/27077437#27077437
 			with open(str(ts_full_file), 'wb') as wfd:
 				for f in ts_list:
-					with open(f, 'rb') as fd:
+					with open(str(f), 'rb') as fd:
 						shutil.copyfileobj(fd, wfd, 1024 * 1024 * 10)
 
 
