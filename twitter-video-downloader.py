@@ -12,6 +12,8 @@ import m3u8
 from pathlib import Path
 import re
 
+import ffmpeg
+
 
 def download(video_url):
 	video_player_url_prefix = 'https://twitter.com/i/videos/tweet/'
@@ -58,8 +60,9 @@ def download(video_url):
 
 		for playlist in m3u8_parse.playlists:
 			resolution = str(playlist.stream_info.resolution[0]) + 'x' + str(playlist.stream_info.resolution[1])
-			resolution_dir = Path(tweet_dir) / Path(resolution)
-			Path.mkdir(resolution_dir, parents = True, exist_ok = True)
+			resolution_file = Path(tweet_dir) / Path(resolution + '.mp4')
+
+			print('[+] Downloading ' + resolution)
 
 			playlist_url = video_host + playlist.uri
 
@@ -67,25 +70,18 @@ def download(video_url):
 			ts_m3u8_parse = m3u8.loads(ts_m3u8_response.text)
 
 			ts_list = []
-
 			for ts_uri in ts_m3u8_parse.segments.uri:
-				print('[+] Downloading ' + resolution)
+				ts_list.append(video_host + ts_uri)
 
-				ts_file = requests.get(video_host + ts_uri)
-				fname = ts_uri.split('/')[-1]
-				ts_path = resolution_dir / Path(fname)
-				ts_list.append(ts_path)
-
-				ts_path.write_bytes(ts_file.content)
-
-
-			ts_full_file = Path(resolution_dir) / Path(resolution + '.ts')
-
-			# Shamelessly taken from https://stackoverflow.com/questions/13613336/python-concatenate-text-files/27077437#27077437
-			with open(str(ts_full_file), 'wb') as wfd:
-				for f in ts_list:
-					with open(str(f), 'rb') as fd:
-						shutil.copyfileobj(fd, wfd, 1024 * 1024 * 10)
+			# Convert TS to MP4
+			ts_streams = [ ffmpeg.input(str(_)) for _ in ts_list ]
+			(
+			    ffmpeg
+				.concat(*ts_streams)
+				.output(str(resolution_file), strict=-2, loglevel='error')
+				.overwrite_output()
+				.run()
+			)
 
 
 if __name__ == '__main__':
