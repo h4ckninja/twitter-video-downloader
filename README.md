@@ -1,8 +1,9 @@
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/h4ckninja)
+
 Twitter Video Downloader
 ========================
 
-
-A simple, if fragile, approach to downloading videos from Twitter. Twitter presents these video files as streams, so as to make it (un)intentionally difficult to just download videos.
+A simple, approach to downloading videos from Twitter. Twitter presents these video files as streams, so as to make it (un)intentionally difficult to just download videos.
 
 
 Installation
@@ -20,7 +21,9 @@ Usage
 `twitter-dl.py [-hdo] VIDEO_URL`
 
 `-d` or `--debug`: This will enable debugging output. Additional `-d` flags (up to 2) will increase debugging.
+
 `-o` or `--output`: Change the output directory. The default is `output/`
+
 `-h`: Help.
 
 
