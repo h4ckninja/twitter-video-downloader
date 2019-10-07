@@ -59,7 +59,7 @@ class TwitterDownloader:
 		video_host, playlist = self.__get_playlist(token)
 
 		if playlist.is_variant:
-			print('Multiple resolutions found. Slurping all resolutions.')
+			print('[+] Multiple resolutions found. Slurping all resolutions.')
 
 			for plist in playlist.playlists:
 				resolution = str(plist.stream_info.resolution[0]) + 'x' + str(plist.stream_info.resolution[1])
@@ -133,6 +133,7 @@ class TwitterDownloader:
 		bearer_token = bearer_token.group(0)
 		self.requests.headers.update({'Authorization': bearer_token})
 		self.__debug('Bearer Token', bearer_token)
+		self.__get_guest_token()
 
 		return bearer_token
 
@@ -148,7 +149,7 @@ class TwitterDownloader:
 
 		else:
 			self.__debug('Player Config JSON - Error', json.dumps(player_config['errors']))
-			print('[-] Rate limit exceeded. Try again later.')
+			print('[-] Rate limit exceeded. Could not recover. Try again later.')
 			sys.exit(1)
 
 		# Get m3u8
@@ -162,6 +163,16 @@ class TwitterDownloader:
 
 		return [video_host, m3u8_parse]
 
+
+	"""
+	Thanks to @devkarim for this fix: https://github.com/h4ckninja/twitter-video-downloader/issues/2#issuecomment-538773026
+	"""
+	def __get_guest_token(self):
+		res = self.requests.post("https://api.twitter.com/1.1/guest/activate.json")
+		res_json = json.loads(res.text)
+		self.requests.headers.update({'x-guest-token': res_json.get('guest_token')})
+
+
 	def __debug(self, msg_prefix, msg_body, msg_body_full = ''):
 		if self.debug == 0:
 			return
@@ -170,7 +181,7 @@ class TwitterDownloader:
 			print('[Debug] ' + '[' + msg_prefix + ']' + ' ' + msg_body)
 
 		if self.debug == 2:
-			print('[Debug] ' + '[' + msg_prefix + ']' + ' ' + msg_body + ' - ' + msg_body_full)
+			print('[Debug+] ' + '[' + msg_prefix + ']' + ' ' + msg_body + ' - ' + msg_body_full)
 
 
 if __name__ == '__main__':
