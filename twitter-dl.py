@@ -4,7 +4,6 @@
 import argparse
 
 import requests
-from bs4 import BeautifulSoup
 import json
 import urllib.parse
 import m3u8
@@ -120,16 +119,15 @@ class TwitterDownloader:
 
 	def __get_bearer_token(self):
 		video_player_url = self.video_player_prefix + self.tweet_data['id']
-		video_player_response = self.requests.get(video_player_url)
-		self.__debug('Video Player Body', '', video_player_response.text)
+		video_player_response = self.requests.get(video_player_url).text
+		self.__debug('Video Player Body', '', video_player_response)
 
-		js_file_soup = BeautifulSoup(video_player_response.text, 'html.parser')
-		js_file_url = js_file_soup.find('script')['src']
-		js_file_response = self.requests.get(js_file_url)
-		self.__debug('JS File Body', '', js_file_response.text)
+		js_file_url  = re.findall('src="(.*js)', video_player_response)[0]
+		js_file_response = self.requests.get(js_file_url).text
+		self.__debug('JS File Body', '', js_file_response)
 
 		bearer_token_pattern = re.compile('Bearer ([a-zA-Z0-9%-])+')
-		bearer_token = bearer_token_pattern.search(js_file_response.text)
+		bearer_token = bearer_token_pattern.search(js_file_response)
 		bearer_token = bearer_token.group(0)
 		self.requests.headers.update({'Authorization': bearer_token})
 		self.__debug('Bearer Token', bearer_token)
