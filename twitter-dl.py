@@ -216,7 +216,7 @@ if __name__ == '__main__':
 	parser.add_argument('tweet_url', help='The video URL on Twitter (https://twitter.com/<user>/status/<id>).')
 	parser.add_argument('-o', '--output', dest='output', default='./output', help='The directory to output to. The structure will be: <output>/<user>/<id>.')
 	parser.add_argument('-d', '--debug', default=0, action='count', dest='debug', help='Debug. Add more to print out response bodies (maximum 2).')
-	parser.add_argument('-w', '--target_width', dest='target_width', default=0, help='In pixels. Download only video resolution closest to this value')
+	parser.add_argument('-w', '--target_width', dest='target_width', default=0, help='In pixels. Download only the video resolution closest to this value')
 
 	args = parser.parse_args()
 

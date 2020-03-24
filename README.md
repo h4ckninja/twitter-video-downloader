@@ -18,14 +18,15 @@ You will also need [ffmpeg](https://ffmpeg.org/). Install for your operating sys
 Usage
 =====
 
-`twitter-dl.py [-hdo] VIDEO_URL`
+`twitter-dl.py [-hdow] VIDEO_URL`
 
 `-d` or `--debug`: This will enable debugging output. Additional `-d` flags (up to 2) will increase debugging.
 
 `-o` or `--output`: Change the output directory. The default is `output/`
 
-`-h`: Help.
+`-w` or `--target_width`: In pixels. Download only the video resolution closest to this value. e.g. `-w 500`
 
+`-h`: Help.
 
 Vagrant
 =======
