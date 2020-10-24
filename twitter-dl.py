@@ -11,7 +11,7 @@ from pathlib import Path
 import re
 import ffmpeg
 import shutil
-
+import copy
 
 class TwitterDownloader:
 	"""
@@ -24,9 +24,10 @@ class TwitterDownloader:
 	video_api = 'https://api.twitter.com/1.1/videos/tweet/config/'
 	tweet_data = {}
 
-	def __init__(self, tweet_url, output_dir = './output', debug = 0):
+	def __init__(self, tweet_url, output_dir='./output', target_width=0, debug=0):
 		self.tweet_url = tweet_url
 		self.output_dir = output_dir
+		self.target_width = int(target_width)
 		self.debug = debug
 
 		if debug > 2:
@@ -43,7 +44,7 @@ class TwitterDownloader:
 
 		output_path = Path(output_dir)
 		storage_dir = output_path / self.tweet_data['user'] / self.tweet_data['id']
-		Path.mkdir(storage_dir, parents = True, exist_ok = True)
+		Path.mkdir(storage_dir, parents=True, exist_ok=True)
 		self.storage = str(storage_dir)
 
 		self.requests = requests.Session()
@@ -58,7 +59,11 @@ class TwitterDownloader:
 		video_host, playlist = self.__get_playlist(token)
 
 		if playlist.is_variant:
-			print('[+] Multiple resolutions found. Slurping all resolutions.')
+			if self.target_width == 0:
+				print('[+] Multiple resolutions found. Slurping all resolutions.')
+			else:
+				print('[+] Multiple resolutions found. Selecting the one closest to target width of ' + str(self.target_width))
+				playlist = self.__filter_playlist(playlist)
 
 			for plist in playlist.playlists:
 				resolution = str(plist.stream_info.resolution[0]) + 'x' + str(plist.stream_info.resolution[1])
@@ -170,6 +175,24 @@ class TwitterDownloader:
 		res_json = json.loads(res.text)
 		self.requests.headers.update({'x-guest-token': res_json.get('guest_token')})
 
+	def __filter_playlist(self, playlist):
+		# Make a copy of the playlist object and reset 'playlists' member
+		new_playlist = copy.deepcopy(playlist)
+		new_playlist.playlists = []
+
+		# Arbitrary high number that any resolution will beat
+		min_dist_2_target = 100000
+
+		for instance in playlist.playlists:
+			# Calculate how far the width of considered resolution is from our target
+			dist_2_target = abs(instance.stream_info.resolution[0] - self.target_width)
+			if dist_2_target < min_dist_2_target:
+				min_dist_2_target = dist_2_target
+				# Replace the only item of new_playlist with this one
+				new_playlist.playlists = []
+				new_playlist.playlists.append(instance)
+
+		return new_playlist
 
 	def __debug(self, msg_prefix, msg_body, msg_body_full = ''):
 		if self.debug == 0:
@@ -190,11 +213,12 @@ if __name__ == '__main__':
 		sys.exit(1)
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument('tweet_url', help = 'The video URL on Twitter (https://twitter.com/<user>/status/<id>).')
-	parser.add_argument('-o', '--output', dest = 'output', default = './output', help = 'The directory to output to. The structure will be: <output>/<user>/<id>.')
-	parser.add_argument('-d', '--debug', default = 0, action = 'count', dest = 'debug', help = 'Debug. Add more to print out response bodies (maximum 2).')
+	parser.add_argument('tweet_url', help='The video URL on Twitter (https://twitter.com/<user>/status/<id>).')
+	parser.add_argument('-o', '--output', dest='output', default='./output', help='The directory to output to. The structure will be: <output>/<user>/<id>.')
+	parser.add_argument('-d', '--debug', default=0, action='count', dest='debug', help='Debug. Add more to print out response bodies (maximum 2).')
+	parser.add_argument('-w', '--target_width', dest='target_width', default=0, help='In pixels. Download only the video resolution closest to this value')
 
 	args = parser.parse_args()
 
-	twitter_dl = TwitterDownloader(args.tweet_url, args.output, args.debug)
+	twitter_dl = TwitterDownloader(args.tweet_url, output_dir=args.output, target_width=args.target_width, debug=args.debug)
 	twitter_dl.download()
