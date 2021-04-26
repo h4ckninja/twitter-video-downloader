@@ -1,4 +1,4 @@
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/h4ckninja)
+Support the original author [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/h4ckninja)
 
 Twitter Video Downloader
 ========================
@@ -11,9 +11,9 @@ Installation
 
 Python3 is a **must**.
 
-`pip install -r requirements.txt`.
+`pip install .`.
 
-You will also need [ffmpeg](https://ffmpeg.org/). Install for your operating system of choice. If you use the supplied Vagrant box, this will be taken care of for you.
+You will also need [ffmpeg](https://ffmpeg.org/). Install for your operating system of choice.
 
 Usage
 =====
@@ -27,17 +27,6 @@ Usage
 `-w` or `--target_width`: In pixels. Download only the video resolution closest to this value. e.g. `-w 500`
 
 `-h`: Help.
-
-Vagrant
-=======
-
-Included is a `Vagrantfile` that will spin up a VM, pre-configured, to run the script. Outside of bugs for my `Vagrantfile`, no support is offered for vagrant.
-
-Access the box and python will be available at `python3`.
-
-### To get your files out
-
-I like to use `python -m http.server`, or in this case, `python3 -m http.server`. I've opened up port 8000 on the box for this purpose.
 
 Output
 ======
