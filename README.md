@@ -1,3 +1,11 @@
+# 💡 This project is now retired (please read below)
+
+First off, thank you everybody for all of the interest in this project. I originally wrote it to solve a one-time problem and it clearly has had a lot of interest beyond solving my problem. However, due to a number of circumstances, as you probably have noticed with my lack of updates I am no longer able to maintain this project. The venerable [youtube-dl](https://github.com/ytdl-org/youtube-dl) supports Twitter video downloading, so please check them out.
+
+Again, thank you so much for the interest in this project. I will keep this repo up for historical reference but will no longer respond to bug reports or messages.
+
+---------------------------------
+
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/h4ckninja)
 
 Twitter Video Downloader
